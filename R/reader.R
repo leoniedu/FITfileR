@@ -21,7 +21,7 @@ readFitFile <- function(fileName) {
 #' @importFrom methods is new
 .readFile <- function(fileName, preallocate = TRUE) {
   
-  con <- file(fileName, "rb")
+  con <- gzfile(fileName, "rb")
   on.exit(close(con))
   file_header <- .readFileHeader(con)
   
