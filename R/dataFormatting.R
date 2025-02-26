@@ -188,7 +188,27 @@
       message_table <- tibble(unlist( message_table) )
       colnames(message_table) <- names
     } else {
-        message_table <- dplyr::bind_rows( message_table )
+      # Process each message
+      message_table <- lapply(message_table, function(msg) {
+        # Get lengths of all elements
+        lengths <- vapply(msg, function(x) length(unlist(x)), integer(1))
+        if (any(lengths > 1)) {
+          # Find maximum length
+          max_len <- max(lengths)
+          # Extend each element to max length
+          msg <- lapply(msg, function(x) {
+            x <- unlist(x)
+            if (length(x) == 1) {
+              rep(x, max_len)  # Repeat single values
+            } else if (length(x) < max_len) {
+              c(x, rep(NA, max_len - length(x)))  # Pad shorter vectors with NA
+            } else {
+              x  # Keep as is if already max length
+            }
+          })
+        }
+                          })
+        message_table <- dplyr::distinct(dplyr::bind_rows( message_table ))
       # message_table <- tryCatch({
       #   dplyr::bind_rows( message_table )},
       #   error = function(e) {
